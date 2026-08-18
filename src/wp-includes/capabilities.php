@@ -34,6 +34,7 @@
  *              `edit_app_password`, `delete_app_passwords`, `delete_app_password`,
  *              and `update_https` capabilities.
  * @since 6.7.0 Added the `edit_block_binding` capability.
+ * @since 7.1.0 Added the `manage_connectors` capability.
  *
  * @global array $post_type_meta_caps Used to get post type meta capabilities.
  *
@@ -796,6 +797,13 @@ function map_meta_cap( $cap, $user_id, ...$args ) {
 		case 'erase_others_personal_data':
 		case 'manage_privacy_options':
 			$caps[] = is_multisite() ? 'manage_network' : 'manage_options';
+			break;
+		case 'manage_connectors':
+			$caps[] = 'manage_options';
+
+			if ( is_multisite() && ! get_site_option( 'allow_connectors', '1' ) ) {
+				$caps[] = 'manage_network_options';
+			}
 			break;
 		case 'create_app_password':
 		case 'list_app_passwords':

@@ -54,6 +54,7 @@ get_current_screen()->add_help_tab(
 			'<p>' . __( 'New site settings are defaults applied when a new site is created in the network. These include welcome email for when a new site or user account is registered, and what&#8127;s put in the first post, page, comment, comment author, and comment URL.' ) . '</p>' .
 			'<p>' . __( 'Upload settings control the size of the uploaded files and the amount of available upload space for each site. You can change the default value for specific sites when you edit a particular site. Allowed file types are also listed (space separated only).' ) . '</p>' .
 			'<p>' . __( 'You can set the language, and WordPress will automatically download and install the translation files (available if your filesystem is writable).' ) . '</p>' .
+			'<p>' . __( 'Connector setting enables/disables connector management for site admins, so that only super admins can add, change, or remove connector credentials such as API keys.' ) . '</p>' .
 			'<p>' . __( 'Menu setting enables/disables the plugin menus from appearing for non super admins, so that only super admins, not site admins, have access to activate plugins.' ) . '</p>' .
 			'<p>' . __( 'Super admins can no longer be added on the Options screen. You must now go to the list of existing users on Network Admin > Users and click on Username or the Edit action link below that name. This goes to an Edit User page where you can check a box to grant super admin privileges.' ) . '</p>',
 	)
@@ -76,6 +77,7 @@ if ( $_POST ) {
 		'registrationnotification'    => 'no',
 		'upload_space_check_disabled' => 1,
 		'add_new_users'               => 0,
+		'allow_connectors'            => 0,
 	);
 	foreach ( $checked_options as $option_name => $option_unchecked_value ) {
 		if ( ! isset( $_POST[ $option_name ] ) ) {
@@ -87,6 +89,7 @@ if ( $_POST ) {
 		'registrationnotification',
 		'registration',
 		'add_new_users',
+		'allow_connectors',
 		'menu_items',
 		'upload_space_check_disabled',
 		'blog_upload_space',
@@ -482,6 +485,19 @@ if ( isset( $_GET['updated'] ) ) {
 			<?php
 		}
 		?>
+
+		<h2 id="wp-settings-section-connector-settings"><?php _e( 'Connector Settings' ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><?php _e( 'Connector Management' ); ?></th>
+				<td>
+					<label><input name="allow_connectors" type="checkbox" id="allow_connectors" value="1"<?php checked( get_site_option( 'allow_connectors', '1' ) ); ?> aria-describedby="allow-connectors-desc" /> <?php _e( 'Allow site administrators to manage connectors via the "Settings &rarr; Connectors" page' ); ?></label>
+					<p class="description" id="allow-connectors-desc">
+						<?php _e( 'When disabled, only network administrators can add, change, or remove connector credentials such as API keys. Existing credentials keep working for everyone.' ); ?>
+					</p>
+				</td>
+			</tr>
+		</table>
 
 		<?php
 		$menu_perms = get_site_option( 'menu_items' );

@@ -846,6 +846,70 @@ function _wp_register_default_connector_settings(): void {
 add_action( 'init', '_wp_register_default_connector_settings', 20 );
 
 /**
+ * Retrieves the setting names used to store connector credentials.
+ *
+ * @since 7.1.0
+ * @access private
+ *
+ * @return string[] List of registered connector credential setting names.
+ */
+function _wp_connectors_get_credential_setting_names(): array {
+	$setting_names = array();
+
+	foreach ( wp_get_connectors() as $connector_data ) {
+		$auth = $connector_data['authentication'];
+
+		if ( 'api_key' !== $auth['method'] && 'application_password' !== $auth['method'] ) {
+			continue;
+		}
+
+		if ( ! empty( $auth['setting_name'] ) ) {
+			$setting_names[] = $auth['setting_name'];
+		}
+	}
+
+	return $setting_names;
+}
+
+/**
+ * Requires the `manage_connectors` capability to save the `connectors` settings group.
+ *
+ * Applies to `wp-admin/options.php`, which is the submission target for Settings API forms.
+ *
+ * @since 7.1.0
+ * @access private
+ *
+ * @return string The capability required to manage connector settings.
+ */
+function _wp_connectors_option_page_capability(): string {
+	return 'manage_connectors';
+}
+add_filter( 'option_page_capability_connectors', '_wp_connectors_option_page_capability' );
+
+/**
+ * Prevents connector credentials from being updated over the REST API without permission.
+ *
+ * Connector credentials are registered settings, so they are writable through
+ * `/wp/v2/settings`, which only requires `manage_options`. Users who cannot manage
+ * connectors must not be able to add, replace, or clear a credential that way.
+ *
+ * @since 7.1.0
+ * @access private
+ *
+ * @param bool   $updated Whether the setting update has already been handled.
+ * @param string $name    Setting name, as shown in REST API responses.
+ * @return bool True to skip the update, otherwise the incoming value.
+ */
+function _wp_connectors_rest_prevent_setting_update( $updated, string $name ): bool {
+	if ( $updated || current_user_can( 'manage_connectors' ) ) {
+		return (bool) $updated;
+	}
+
+	return in_array( $name, _wp_connectors_get_credential_setting_names(), true );
+}
+add_filter( 'rest_pre_update_setting', '_wp_connectors_rest_prevent_setting_update', 10, 2 );
+
+/**
  * Passes stored connector API keys to the WP AI client.
  *
  * @since 7.0.0

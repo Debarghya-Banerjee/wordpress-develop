@@ -10,7 +10,7 @@
 /** WordPress Administration Bootstrap */
 require_once __DIR__ . '/admin.php';
 
-if ( ! current_user_can( 'manage_options' ) ) {
+if ( ! current_user_can( 'manage_connectors' ) ) {
 	wp_die(
 		'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
 		'<p>' . __( 'Sorry, you are not allowed to manage connectors on this site.' ) . '</p>',
